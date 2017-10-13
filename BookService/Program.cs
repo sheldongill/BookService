@@ -11,8 +11,8 @@ namespace BookService
     {
         public static int Main(string[] args)
         {
-            var appName = typeof(Program).Namespace;
-            IWebHost host;
+            //var appName = typeof(Program).Namespace;
+            var appName = typeof(Program).Assembly.FullName;
 
             var configuration = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
@@ -22,7 +22,6 @@ namespace BookService
                         optional: true)
                     .Build();
 
-
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                     .Enrich.FromLogContext()
@@ -30,7 +29,7 @@ namespace BookService
             try
             {
                 Log.Information("Initialising {appName}", appName);
-                host = WebHost.CreateDefaultBuilder(args)
+                var host = WebHost.CreateDefaultBuilder(args)
                         .UseStartup<Startup>()
                         .UseSerilog()
                         .Build();

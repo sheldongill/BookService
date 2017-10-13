@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using BookService.Models;
+using Serilog;
 
 namespace BookService.Repositories
 {
@@ -16,6 +17,7 @@ namespace BookService.Repositories
     public class BookRepository : IBookRepository<Book, int>
     {
         AppDBContext ctx;
+        readonly ILogger logger = Log.ForContext<BookRepository>();
 
         public BookRepository(AppDBContext c)
         {
@@ -26,6 +28,10 @@ namespace BookService.Repositories
             // FIXME: Should check that b.Id isn't already used.
             ctx.Books.Add(b);
             int res = ctx.SaveChanges();
+            if (res != 0)
+            {
+                logger.Debug("Added Book: {Book}",b);
+            }
             return res;
         }
 
@@ -59,12 +65,27 @@ namespace BookService.Repositories
             var book = ctx.Books.Find(id);
             if (book != null)
             {
+                Book changedBook = new Book();  // this is so we can log only the changed fields.
+
+                if (book.BookTitle != b.BookTitle)
+                    changedBook.BookTitle = b.BookTitle;
+                if (book.AuthorName != b.AuthorName)
+                    changedBook.AuthorName = b.AuthorName;
+                if (book.Publisher != b.Publisher)
+                    changedBook.Publisher = b.Publisher;
+                if (book.Genre != b.Genre)
+                    changedBook.Genre = b.Genre;
+
                 book.BookTitle = b.BookTitle;
                 book.AuthorName = b.AuthorName;
                 book.Publisher = b.Publisher;
                 book.Genre = b.Genre;
                 book.Price = b.Price;
                 res = ctx.SaveChanges();
+                if (res != 0)
+                {
+                    logger.Debug("Altered {@Book}", changedBook);
+                }
             }
             return res;
         }

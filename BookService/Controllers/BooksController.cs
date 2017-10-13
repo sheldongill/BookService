@@ -7,6 +7,9 @@ using SQLitePCL;
 
 namespace BookService.Controllers
 {
+    /// <summary>
+    /// Books resource endpoint.
+    /// </summary>
     [Route("api/[controller]")]
     public class BooksController : Controller
     {
@@ -17,14 +20,21 @@ namespace BookService.Controllers
             _bookRepository = bRepository;
         }
 
-        // GET api/values
+        /// <summary>
+        ///   Get ALL the books.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public IEnumerable<Book> Get()
         {
             return _bookRepository.GetBooks();
         }
 
-        // GET api/values/5
+        /// <summary>
+        /// Get book with specified id.
+        /// </summary>
+        /// <param name="id">ID for the book</param>
+        /// <returns></returns>
         [HttpGet("{id}", Name = "GetBookById")]
         public IActionResult Get(int id)
         {
@@ -36,7 +46,11 @@ namespace BookService.Controllers
             return Ok(book);
         }
 
-        // POST api/values
+        /// <summary>
+        /// Create a new book
+        /// </summary>
+        /// <param name="aBook">details about the book</param>
+        /// <returns></returns>
         [HttpPost]
         public IActionResult Post([FromBody]Book aBook)
         {
@@ -57,7 +71,12 @@ namespace BookService.Controllers
             return BadRequest();
         }
 
-        // PUT api/values/5
+        /// <summary>
+        /// Change Book information
+        /// </summary>
+        /// <param name="id">ID for the book</param>
+        /// <param name="aBook">book details</param>
+        /// <returns></returns>
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody]Book aBook)
         {
@@ -73,7 +92,11 @@ namespace BookService.Controllers
             return Forbid();
         }
 
-        // DELETE api/values/5
+        /// <summary>
+        /// Delete a book. Why would you do that!?
+        /// </summary>
+        /// <param name="id">ID for the book</param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {

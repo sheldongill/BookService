@@ -1,14 +1,14 @@
-﻿using System.ComponentModel;
-using System.IO;
-using BookService.Models;
-using BookService.Repositories;
+﻿using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.PlatformAbstractions;
+using Serilog;
+using BookService.Diagnostics;
+using BookService.Models;
+using BookService.Repositories;
 
 namespace BookService
 {
@@ -50,13 +50,15 @@ namespace BookService
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            Log.Logger.Debug($"Hosting environment: {env.EnvironmentName}");
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseMiddleware<RequestLogMiddleware>();
             app.UseMvc();
             app.UseSwagger();
             app.UseSwaggerUI(options =>

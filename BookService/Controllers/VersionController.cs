@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 
-namespace ServiceShell.Controllers
+namespace BookService.Controllers
 {
     /// <summary>
     ///  returns current build version of service
