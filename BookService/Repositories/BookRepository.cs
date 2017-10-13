@@ -19,10 +19,11 @@ namespace BookService.Repositories
         AppDBContext ctx;
         readonly ILogger logger = Log.ForContext<BookRepository>();
 
-        public BookRepository(AppDBContext c)
+        public BookRepository(AppDBContext context)
         {
-            ctx = c;
+            ctx = context;
         }
+
         public int AddBook(Book b)
         {
             // FIXME: Should check that b.Id isn't already used.

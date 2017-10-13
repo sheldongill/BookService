@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using BookService.Models;
 using BookService.Repositories;
-using SQLitePCL;
 
 namespace BookService.Controllers
 {
