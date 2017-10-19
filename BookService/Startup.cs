@@ -29,7 +29,7 @@ namespace BookService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<AppDBContext>(opts => opts.UseSqlServer(Configuration["AppSettings:DefaultConnection:ConnectionString"]));
+            services.AddDbContext<AppDBContext>(opts => opts.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
             services.AddTransient(typeof(IBookRepository<Book, int>), typeof(BookRepository));
             services.AddMvc();
 

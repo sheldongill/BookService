@@ -11,8 +11,7 @@ namespace BookService
     {
         public static int Main(string[] args)
         {
-            //var appName = typeof(Program).Namespace;
-            var appName = typeof(Program).Assembly.FullName;
+            var appName = System.Reflection.Assembly.GetEntryAssembly().GetName();
 
             var configuration = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
@@ -56,3 +55,4 @@ namespace BookService
                         .Build();
     }
 }
+

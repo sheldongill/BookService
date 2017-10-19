@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using BookService.Models;
 using BookService.Repositories;
@@ -24,8 +25,13 @@ namespace BookService.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public IEnumerable<Book> Get()
+        [Produces("application/json")]
+        public IEnumerable<Book> GetAllBooks(string title = null)
         {
+            if (title != null)
+            {
+                return _bookRepository.GetBooks().Where(b => b.BookTitle == title);
+            }
             return _bookRepository.GetBooks();
         }
 
@@ -35,7 +41,8 @@ namespace BookService.Controllers
         /// <param name="id">ID for the book</param>
         /// <returns></returns>
         [HttpGet("{id}", Name = "GetBookById")]
-        public IActionResult Get(int id)
+        [Produces("application/json")]
+        public IActionResult GetBookById(int id)
         {
             var book = _bookRepository.GetBook(id);
             if (book == null)
@@ -51,15 +58,15 @@ namespace BookService.Controllers
         /// <param name="aBook">details about the book</param>
         /// <returns></returns>
         [HttpPost]
-        public IActionResult Post([FromBody]Book aBook)
+        [Consumes("application/json")]
+        public IActionResult CreateBook([FromBody]Book aBook)
         {
             try
             {
                 int res = _bookRepository.AddBook(aBook);
                 if (res != 0)
                 {
-                    return Ok(res);
-                    //return CreatedAtRoute("GetBookById", res);
+                    return CreatedAtRoute("GetBookById", new {id = aBook.Id}, aBook);
                 }
                 return BadRequest(res);
             }
@@ -67,7 +74,6 @@ namespace BookService.Controllers
             {
                 return BadRequest(ex);
             }
-            return BadRequest();
         }
 
         /// <summary>
@@ -77,7 +83,8 @@ namespace BookService.Controllers
         /// <param name="aBook">book details</param>
         /// <returns></returns>
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody]Book aBook)
+        [Produces("application/json")]
+        public IActionResult UpdateBook(int id, [FromBody]Book aBook)
         {
             if (id == aBook.Id)
             {
@@ -97,7 +104,7 @@ namespace BookService.Controllers
         /// <param name="id">ID for the book</param>
         /// <returns></returns>
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public IActionResult DeleteBookById(int id)
         {
             var result = _bookRepository.DeleteBook(id);
             if (result != 0)
@@ -105,6 +112,12 @@ namespace BookService.Controllers
                 return Ok();
             }
             return NotFound();
+        }
+
+        [HttpDelete]
+        public IActionResult DeleteBook([FromBody] Book aBook)
+        {
+            return DeleteBookById(aBook.Id);
         }
     }
 }

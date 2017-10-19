@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace BookService.Controllers
 {
     /// <summary>
     ///  returns current build version of service
     /// </summary>
-    [Route("/[controller]")]
+    [Route("/version")]
     public class VersionController : Controller
     {
         public VersionController()
@@ -15,15 +13,13 @@ namespace BookService.Controllers
         }
 
         /// <summary>
-        /// Retrieve the version information: Major, Minor, Patch and additional for build or whatever
+        /// Retrieve the version information: Major, Minor, Revision and build
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public IActionResult Get()
         {
-            var runtimeVersion = typeof(Startup).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
-            var tokens = runtimeVersion.Version.Split('.');
-            return tokens;
+            return Ok(System.Reflection.Assembly.GetEntryAssembly().GetName().Version);
         }
     }
 }

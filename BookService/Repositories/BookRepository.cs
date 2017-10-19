@@ -16,22 +16,22 @@ namespace BookService.Repositories
 
     public class BookRepository : IBookRepository<Book, int>
     {
-        AppDBContext ctx;
+        AppDBContext dbContext;
         readonly ILogger logger = Log.ForContext<BookRepository>();
 
         public BookRepository(AppDBContext context)
         {
-            ctx = context;
+            dbContext = context;
         }
 
         public int AddBook(Book b)
         {
             // FIXME: Should check that b.Id isn't already used.
-            ctx.Books.Add(b);
-            int res = ctx.SaveChanges();
+            dbContext.Books.Add(b);
+            int res = dbContext.SaveChanges();
             if (res != 0)
             {
-                logger.Debug("Added Book: {Book}",b);
+                logger.Debug("Added Book: {@Book}",b);
             }
             return res;
         }
@@ -39,32 +39,35 @@ namespace BookService.Repositories
         public int DeleteBook(int id)
         {
             int res = 0;
-            var book = ctx.Books.FirstOrDefault(b => b.Id == id);
+            var book = dbContext.Books.FirstOrDefault(b => b.Id == id);
             if (book != null)
             {
-                ctx.Books.Remove(book);
-                res = ctx.SaveChanges();
+                dbContext.Books.Remove(book);
+                res = dbContext.SaveChanges();
+            }
+            if (res != 0)
+            {
+                logger.Debug("Deleted Book: {@Book}", book);
             }
             return res;
         }
 
         public Book GetBook(int id)
         {
-            var book = ctx.Books.FirstOrDefault(b => b.Id == id);
+            var book = dbContext.Books.FirstOrDefault(b => b.Id == id);
             return book;
         }
 
         public IEnumerable<Book> GetBooks()
         {
-            var books = ctx.Books.ToList();
-            return books;
+            return dbContext.Books.AsEnumerable<Book>();
         }
 
         public int UpdateBook(int id, Book b)
         {
             int res = 0;
-            var book = ctx.Books.Find(id);
-            if (book != null)
+            var book = dbContext.Books.Find(id);
+            if ((book != null) && (b.Id == id))
             {
                 Book changedBook = new Book();  // this is so we can log only the changed fields.
 
@@ -82,7 +85,7 @@ namespace BookService.Repositories
                 book.Publisher = b.Publisher;
                 book.Genre = b.Genre;
                 book.Price = b.Price;
-                res = ctx.SaveChanges();
+                res = dbContext.SaveChanges();
                 if (res != 0)
                 {
                     logger.Debug("Altered {@Book}", changedBook);
@@ -92,3 +95,4 @@ namespace BookService.Repositories
         }
     }
 }
+
