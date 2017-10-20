@@ -10,7 +10,7 @@ using System;
 
 namespace BookService.Migrations
 {
-    [DbContext(typeof(AppDBContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20171012060424_Initial migration")]
     partial class Initialmigration
     {

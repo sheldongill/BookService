@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using BookService.Models;
 using BookService.Repositories;
+using BookService.ControllerExtensions;
 
 namespace BookService.Controllers
 {
@@ -26,13 +28,14 @@ namespace BookService.Controllers
         /// <returns></returns>
         [HttpGet]
         [Produces("application/json")]
-        public IEnumerable<Book> GetAllBooks(string title = null)
+        public async Task<IEnumerable<Book>> GetAllBooks(string title = null)
         {
             if (title != null)
             {
-                return _bookRepository.GetBooks().Where(b => b.BookTitle == title);
+                var books = await _bookRepository.GetBooks();
+                return books.Where(b => b.BookTitle == title);
             }
-            return _bookRepository.GetBooks();
+            return await _bookRepository.GetBooks();
         }
 
         /// <summary>
@@ -42,9 +45,9 @@ namespace BookService.Controllers
         /// <returns></returns>
         [HttpGet("{id}", Name = "GetBookById")]
         [Produces("application/json")]
-        public IActionResult GetBookById(int id)
+        public async Task<IActionResult> GetBookById(int id)
         {
-            var book = _bookRepository.GetBook(id);
+            var book = await _bookRepository.GetBook(id);
             if (book == null)
             {
                 return NotFound();
@@ -59,11 +62,11 @@ namespace BookService.Controllers
         /// <returns></returns>
         [HttpPost]
         [Consumes("application/json")]
-        public IActionResult CreateBook([FromBody]Book aBook)
+        public async Task<IActionResult> CreateBook([FromBody]Book aBook)
         {
             try
             {
-                int res = _bookRepository.AddBook(aBook);
+                int res = await _bookRepository.AddBook(aBook);
                 if (res != 0)
                 {
                     return CreatedAtRoute("GetBookById", new {id = aBook.Id}, aBook);
@@ -84,18 +87,18 @@ namespace BookService.Controllers
         /// <returns></returns>
         [HttpPut("{id}")]
         [Produces("application/json")]
-        public IActionResult UpdateBook(int id, [FromBody]Book aBook)
+        public async Task<IActionResult> UpdateBook(int id, [FromBody]Book aBook)
         {
             if (id == aBook.Id)
             {
-                int res = _bookRepository.UpdateBook(id, aBook);
+                int res = await _bookRepository.UpdateBook(id, aBook);
                 if (res != 0)
                 {
                     return Ok(res);
                 }
                 return NotFound();
             }
-            return Forbid();
+            return this.Conflict(new WebAPIError("Resource IDs do not match"));
         }
 
         /// <summary>
@@ -104,9 +107,9 @@ namespace BookService.Controllers
         /// <param name="id">ID for the book</param>
         /// <returns></returns>
         [HttpDelete("{id}")]
-        public IActionResult DeleteBookById(int id)
+        public async Task<IActionResult> DeleteBookById(int id)
         {
-            var result = _bookRepository.DeleteBook(id);
+            var result = await _bookRepository.DeleteBook(id);
             if (result != 0)
             {
                 return Ok();
@@ -115,9 +118,9 @@ namespace BookService.Controllers
         }
 
         [HttpDelete]
-        public IActionResult DeleteBook([FromBody] Book aBook)
+        public async Task<IActionResult> DeleteBook([FromBody] Book aBook)
         {
-            return DeleteBookById(aBook.Id);
+            return await DeleteBookById(aBook.Id);
         }
     }
 }

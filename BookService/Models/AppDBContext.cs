@@ -2,9 +2,9 @@
 
 namespace BookService.Models
 {
-    public class AppDBContext : DbContext
+    public class AppDbContext : DbContext
     {
-        public AppDBContext(DbContextOptions opts) : base(opts)
+        public AppDbContext(DbContextOptions opts) : base(opts)
         {
         }
 

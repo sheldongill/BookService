@@ -1,34 +1,37 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using BookService.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Extensions.Internal;
 using Serilog;
 
 namespace BookService.Repositories
 {
     public interface IBookRepository<TEntity, U> where TEntity : class
     {
-        IEnumerable<TEntity> GetBooks();
-        TEntity GetBook(U id);
-        int AddBook(TEntity b);
-        int UpdateBook(U id, TEntity b);
-        int DeleteBook(U id);
+        Task<IEnumerable<TEntity>> GetBooks();
+        Task<TEntity> GetBook(U id);
+        Task<int> AddBook(TEntity b);
+        Task<int> UpdateBook(U id, TEntity b);
+        Task<int> DeleteBook(U id);
     }
 
     public class BookRepository : IBookRepository<Book, int>
     {
-        AppDBContext dbContext;
+        AppDbContext dbContext;
         readonly ILogger logger = Log.ForContext<BookRepository>();
 
-        public BookRepository(AppDBContext context)
+        public BookRepository(AppDbContext context)
         {
             dbContext = context;
         }
 
-        public int AddBook(Book b)
+        public async Task<int> AddBook(Book b)
         {
             // FIXME: Should check that b.Id isn't already used.
             dbContext.Books.Add(b);
-            int res = dbContext.SaveChanges();
+            int res = await dbContext.SaveChangesAsync();
             if (res != 0)
             {
                 logger.Debug("Added Book: {@Book}",b);
@@ -36,14 +39,14 @@ namespace BookService.Repositories
             return res;
         }
 
-        public int DeleteBook(int id)
+        public async Task<int> DeleteBook(int id)
         {
             int res = 0;
             var book = dbContext.Books.FirstOrDefault(b => b.Id == id);
             if (book != null)
             {
                 dbContext.Books.Remove(book);
-                res = dbContext.SaveChanges();
+                res = await dbContext.SaveChangesAsync();
             }
             if (res != 0)
             {
@@ -52,18 +55,18 @@ namespace BookService.Repositories
             return res;
         }
 
-        public Book GetBook(int id)
+        public async Task<Book> GetBook(int id)
         {
-            var book = dbContext.Books.FirstOrDefault(b => b.Id == id);
+            var book = await dbContext.Books.FirstOrDefaultAsync(b => b.Id == id);
             return book;
         }
 
-        public IEnumerable<Book> GetBooks()
+        public async Task<IEnumerable<Book>> GetBooks()
         {
-            return dbContext.Books.AsEnumerable<Book>();
+            return await dbContext.Books.ToListAsync();
         }
 
-        public int UpdateBook(int id, Book b)
+        public async Task<int> UpdateBook(int id, Book b)
         {
             int res = 0;
             var book = dbContext.Books.Find(id);
@@ -85,7 +88,7 @@ namespace BookService.Repositories
                 book.Publisher = b.Publisher;
                 book.Genre = b.Genre;
                 book.Price = b.Price;
-                res = dbContext.SaveChanges();
+                res = await dbContext.SaveChangesAsync();
                 if (res != 0)
                 {
                     logger.Debug("Altered {@Book}", changedBook);
@@ -95,4 +98,3 @@ namespace BookService.Repositories
         }
     }
 }
-

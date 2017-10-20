@@ -11,9 +11,9 @@ namespace BookService.Controllers
     [Route("/health-check")]
     public class HealthCheckController : Controller
     {
-        private AppDBContext dbContext;
+        private AppDbContext dbContext;
 
-        public HealthCheckController(AppDBContext context)
+        public HealthCheckController(AppDbContext context)
         {
             dbContext = context;
         }
