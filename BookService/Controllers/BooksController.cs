@@ -15,6 +15,7 @@ namespace BookService.Controllers
     /// </summary>
     [Authorize]
     [Route("api/[controller]")]
+    [Produces("application/json")]
     public class BooksController : Controller
     {
         private IBookRepository<Book, int> _bookRepository;
@@ -29,7 +30,7 @@ namespace BookService.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Produces("application/json")]
+        [ProducesResponseType(typeof(IEnumerable<Book>), 200)]
         public async Task<IEnumerable<Book>> GetAllBooks(string title = null)
         {
             if (title != null)
@@ -46,7 +47,8 @@ namespace BookService.Controllers
         /// <param name="id">ID for the book</param>
         /// <returns></returns>
         [HttpGet("{id}", Name = "GetBookById")]
-        [Produces("application/json")]
+        [ProducesResponseType(typeof(Book), 200)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> GetBookById(int id)
         {
             var book = await _bookRepository.GetBook(id);
@@ -64,8 +66,14 @@ namespace BookService.Controllers
         /// <returns></returns>
         [HttpPost]
         [Consumes("application/json")]
+        [ProducesResponseType(typeof(Book), 201)]
+        [ProducesResponseType(typeof(WebAPIError), 400)]
         public async Task<IActionResult> CreateBook([FromBody]Book aBook)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 int res = await _bookRepository.AddBook(aBook);
@@ -73,11 +81,11 @@ namespace BookService.Controllers
                 {
                     return CreatedAtRoute("GetBookById", new {id = aBook.Id}, aBook);
                 }
-                return BadRequest(res);
+                return BadRequest(new WebAPIError("Failed to create book."));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex);
+                return BadRequest(new WebAPIError(ex.Message, "book-exception"));
             }
         }
 
@@ -88,19 +96,25 @@ namespace BookService.Controllers
         /// <param name="aBook">book details</param>
         /// <returns></returns>
         [HttpPut("{id}")]
-        [Produces("application/json")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(WebAPIError), 400)]
+        [ProducesResponseType(typeof(WebAPIError), 409)]
         public async Task<IActionResult> UpdateBook(int id, [FromBody]Book aBook)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (id == aBook.Id)
             {
                 int res = await _bookRepository.UpdateBook(id, aBook);
                 if (res != 0)
                 {
-                    return Ok(res);
+                    return Ok();
                 }
-                return NotFound();
+                return NotFound(new WebAPIError("Failed to update book."));
             }
-            return this.Conflict(new WebAPIError("Resource IDs do not match"));
+            return this.Conflict(new WebAPIError("Resource IDs do not match."));
         }
 
         /// <summary>
@@ -111,18 +125,12 @@ namespace BookService.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBookById(int id)
         {
-            var result = await _bookRepository.DeleteBook(id);
+            var result = await _bookRepository.RemoveBook(id);
             if (result != 0)
             {
                 return Ok();
             }
             return NotFound();
-        }
-
-        [HttpDelete]
-        public async Task<IActionResult> DeleteBook([FromBody] Book aBook)
-        {
-            return await DeleteBookById(aBook.Id);
         }
     }
 }

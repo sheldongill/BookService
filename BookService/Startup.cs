@@ -13,6 +13,7 @@ using BookService.Models;
 using BookService.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace BookService
 {
@@ -45,9 +46,9 @@ namespace BookService
                     //options.Audience = "api.example.com/bookservice";
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("qwertyuiopasdfghjklzxcvbnm123456")),
-                        ValidAudience = "api.example.com/bookservice",
-                        ValidIssuer = "Online JWT Builder",
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("Auth:Key").Value)),
+                        ValidAudience = Configuration.GetSection("Auth:Audience").Value,
+                        ValidIssuer = Configuration.GetSection("Auth:Issuer").Value,
                         ValidateIssuer = true,
                         ValidateIssuerSigningKey = true,
                         ValidateAudience = true,
@@ -85,7 +86,8 @@ namespace BookService
                             Description = "Basic RESTful book service."
                         });
                     var xmlDocumentationPath = Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "BookService.xml");
-                    options.IncludeXmlComments(xmlDocumentationPath);
+                    options.IncludeXmlComments(xmlDocumentationPath);                    
+                    options.AddSecurityDefinition("Bearer", new ApiKeyScheme() { In = "header", Description = "Please insert JWT with Bearer into field", Name = "Authorization", Type = "apiKey" });
                 });
         }
 
@@ -100,13 +102,14 @@ namespace BookService
 
             app.UseAuthentication();
             app.UseMiddleware<RequestLogMiddleware>();
-            app.UseMvc();
 
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {
                 options.SwaggerEndpoint("v1/swagger.json", "Book Service V1");
             });
+
+            app.UseMvc();
         }
     }
 }

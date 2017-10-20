@@ -10,15 +10,12 @@ namespace BookService.Controllers
     [AllowAnonymous]
     public class VersionController : Controller
     {
-        public VersionController()
-        {
-        }
-
         /// <summary>
         /// Retrieve the version information: Major, Minor, Revision and build
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        [ProducesResponseType(typeof(System.Version), 200)]
         public IActionResult Get()
         {
             return Ok(System.Reflection.Assembly.GetEntryAssembly().GetName().Version);

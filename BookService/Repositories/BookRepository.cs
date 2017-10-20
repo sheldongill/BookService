@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using BookService.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Extensions.Internal;
 using Serilog;
@@ -14,7 +15,7 @@ namespace BookService.Repositories
         Task<TEntity> GetBook(U id);
         Task<int> AddBook(TEntity b);
         Task<int> UpdateBook(U id, TEntity b);
-        Task<int> DeleteBook(U id);
+        Task<int> RemoveBook(U id);
     }
 
     public class BookRepository : IBookRepository<Book, int>
@@ -39,7 +40,7 @@ namespace BookService.Repositories
             return res;
         }
 
-        public async Task<int> DeleteBook(int id)
+        public async Task<int> RemoveBook(int id)
         {
             int res = 0;
             var book = dbContext.Books.FirstOrDefault(b => b.Id == id);
