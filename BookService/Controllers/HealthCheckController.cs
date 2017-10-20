@@ -1,9 +1,11 @@
 ﻿using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using BookService.ControllerExtensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BookService.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 
 namespace BookService.Controllers
@@ -23,6 +25,7 @@ namespace BookService.Controllers
         /// </summary>
         /// <returns>200 - Running if okay.</returns>
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             try
@@ -31,7 +34,8 @@ namespace BookService.Controllers
                 var result = await dbContext.Database.ExecuteSqlCommandAsync("SELECT 1");
                 if (result == 0)
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError, "Couldn't execute SQL select!");
+                    return this.InternalServerError("Couldn't execute SQL select!");
+                    //return StatusCode(StatusCodes.Status500InternalServerError, "Couldn't execute SQL select!");
                 }
 
                 // Have any EF migrations run on this database?

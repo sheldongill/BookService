@@ -1,0 +1,7 @@
+{
+    "iss": "Online JWT Builder",
+    "iat": 1498874665,
+    "exp": 1603159465,
+    "aud": "api.example.com/bookservice",
+    "sub": "bookservice@example.com"
+}

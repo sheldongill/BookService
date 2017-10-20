@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +11,8 @@ using Serilog;
 using BookService.Diagnostics;
 using BookService.Models;
 using BookService.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BookService
 {
@@ -31,10 +35,43 @@ namespace BookService
         {
             services.AddDbContext<AppDbContext>(opts => opts.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
             services.AddTransient(typeof(IBookRepository<Book, int>), typeof(BookRepository));
-//            services.AddMvc();
-            services.AddMvcCore()
-                .AddJsonFormatters()
-                .AddApiExplorer();
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    //options.Authority = "Online JWT Builder";
+                    //options.Audience = "api.example.com/bookservice";
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("qwertyuiopasdfghjklzxcvbnm123456")),
+                        ValidAudience = "api.example.com/bookservice",
+                        ValidIssuer = "Online JWT Builder",
+                        ValidateIssuer = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true
+                    };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnAuthenticationFailed = context =>
+                        {
+                            Log.Information("Authentication failure: ", context.Exception.Message);
+                            return Task.CompletedTask;
+                        },
+                        OnTokenValidated = context =>
+                        {
+                            Log.Debug("Validated token: ", context.SecurityToken);
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
+
+            services.AddMvc();
+//            services.AddMvcCore()
+//                    .AddJsonFormatters()
+//                    .AddApiExplorer();
 
             services.AddSwaggerGen(
                 options =>
@@ -61,8 +98,10 @@ namespace BookService
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseAuthentication();
             app.UseMiddleware<RequestLogMiddleware>();
             app.UseMvc();
+
             app.UseSwagger();
             app.UseSwaggerUI(options =>
             {

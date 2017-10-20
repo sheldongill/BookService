@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BookService.Controllers
 {
@@ -6,6 +7,7 @@ namespace BookService.Controllers
     ///  returns current build version of service
     /// </summary>
     [Route("/version")]
+    [AllowAnonymous]
     public class VersionController : Controller
     {
         public VersionController()

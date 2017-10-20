@@ -6,12 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 using BookService.Models;
 using BookService.Repositories;
 using BookService.ControllerExtensions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookService.Controllers
 {
     /// <summary>
     /// Books resource endpoint.
     /// </summary>
+    [Authorize]
     [Route("api/[controller]")]
     public class BooksController : Controller
     {
