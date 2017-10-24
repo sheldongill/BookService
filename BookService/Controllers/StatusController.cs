@@ -10,20 +10,22 @@ using Microsoft.AspNetCore.Http;
 
 namespace BookService.Controllers
 {
-    [Route("/health-check")]
-    public class HealthCheckController : Controller
+    [Route("/status")]
+    public class StatusController : Controller
     {
         private AppDbContext dbContext;
 
-        public HealthCheckController(AppDbContext context)
+        public StatusController(AppDbContext context)
         {
             dbContext = context;
         }
 
         /// <summary>
-        /// Checks the basic health of this application as it's running.
+        /// Checks the basic health status of this application as it's running.
         /// </summary>
         /// <returns>200 - Running if okay.</returns>
+        /// <returns>500 if there are no migrations or the database isn't readable.</returns>
+        /// <returns>503 if there is a problem connecting to the database.</returns>
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> GetAll()
@@ -54,3 +56,4 @@ namespace BookService.Controllers
         }
     }
 }
+
