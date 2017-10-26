@@ -51,8 +51,8 @@ namespace BookService
 
         public static IWebHost BuildWebHost(string[] args) =>
                 WebHost.CreateDefaultBuilder(args)
+                        .UseSetting("EFDesignTime","yes")
                         .UseStartup<Startup>()
                         .Build();
     }
 }
-

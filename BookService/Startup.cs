@@ -63,23 +63,40 @@ namespace BookService
                         },
                         OnTokenValidated = context =>
                         {
-                            Log.Debug("Validated token: ", context.SecurityToken);
+                            //Log.Debug("Validated token: ", context.SecurityToken);
+                            Log.Debug("Validated token: ", context);
                             return Task.CompletedTask;
                         }
                     };
                 });
 
-            services.AddMvc();
-//            services.AddMvcCore()
-//                    .AddJsonFormatters()
-//                    .AddApiExplorer();
+//          Instead of services.AddMvc(); we are explicit, leaving out Razor views =>
+            services.AddMvcCore()
+                    .AddApiExplorer()
+                    .AddAuthorization()
+                    .AddDataAnnotations()
+                    .AddJsonFormatters()
+                    .AddCors(option =>
+                    {
+                        option.AddPolicy("AllowAnyOrigin", policy =>
+                        {
+                            policy.WithOrigins("http://*")
+                                  .AllowAnyMethod()
+                                  .AllowCredentials();
+                        });
+                        option.AddPolicy("OnlyMonitoring", policy =>
+                        {
+                            policy.WithOrigins("http://*")
+                                  .WithMethods("GET");
+                        });
+                    });
 
             services.AddSwaggerGen(
                 options =>
                 {
                     options.SwaggerDoc(
                         "v1",
-                        new Swashbuckle.AspNetCore.Swagger.Info
+                        new Info
                         {
                             Title = "Book Service",
                             Version = "v1",
@@ -99,9 +116,14 @@ namespace BookService
             {
                 app.UseDeveloperExceptionPage();
             }
+            if (Configuration.GetValue("EFDesignTime","") == "true")
+            {
+                Log.Error("EF designing!");
+            }
 
             app.UseAuthentication();
             app.UseMiddleware<RequestLogMiddleware>();
+            app.UseCors("AllowAnyOrigin");
 
             app.UseSwagger();
             app.UseSwaggerUI(options =>

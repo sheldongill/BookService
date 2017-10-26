@@ -7,6 +7,7 @@ using BookService.Models;
 using BookService.Repositories;
 using BookService.ControllerExtensions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 
 namespace BookService.Controllers
 {
@@ -15,6 +16,7 @@ namespace BookService.Controllers
     /// </summary>
     [Authorize]
     [Route("api/[controller]")]
+    [EnableCors("AllowAnyOrigin")]
     [Produces("application/json")]
     public class BooksController : Controller
     {
