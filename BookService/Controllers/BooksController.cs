@@ -97,7 +97,8 @@ namespace BookService.Controllers
         /// <param name="id">ID for the book</param>
         /// <param name="aBook">book details</param>
         /// <returns></returns>
-        [HttpPut("{id}")]
+        [HttpPut("{id}")]   // Should only change the whole thing
+        [HttpPatch("{id}")] // We support partial updates so that _should_ be PATCH
         [ProducesResponseType(200)]
         [ProducesResponseType(typeof(WebAPIError), 400)]
         [ProducesResponseType(typeof(WebAPIError), 409)]
