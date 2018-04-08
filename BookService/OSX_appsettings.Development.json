@@ -1,0 +1,21 @@
+﻿{
+  "Data": {
+    "DefaultConnection": {
+      "ConnectionString": "Server=192.168.200.136,1401;Database=BookServiceDB;User Id=booksvc;Password=Passw0rd1"
+    }
+  },
+  "Auth": {
+      "Key": "qwertyuiopasdfghjklzxcvbnm123456",
+      "Issuer": "Online JWT Builder",
+      "Audience": "api.example.com/bookservice"
+  },
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Debug",
+        "System": "Warning"
+      }
+    }
+  }
+}

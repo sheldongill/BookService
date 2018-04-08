@@ -3,16 +3,17 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using BookService.Diagnostics;
 using BookService.Models;
 using BookService.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace BookService
@@ -42,8 +43,11 @@ namespace BookService
                 })
                 .AddJwtBearer(options =>
                 {
-                    //options.Authority = "Online JWT Builder";
+                    //options.Authority = "Online JWT Builder";   // Typically a domain
                     //options.Audience = "api.example.com/bookservice";
+                    options.IncludeErrorDetails = true; // Disable in production
+                    options.RequireHttpsMetadata = false; // True in production
+                    options.SaveToken = true;
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("Auth:Key").Value)),
@@ -91,6 +95,16 @@ namespace BookService
                         });
                     });
 
+            // When running behind a reverse proxy, we need to use forwarded headers
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                //options.ForwardLimit = 2;
+                //options.KnownProxies.Add(IPAddress.Parse("127.0.0.1"));
+                //options.KnownProxies.Add(IPAddress.Parse("::1"));
+                //options.KnownNetworks.Add(IPAddress.Parse("::1"));
+            });
+
             services.AddSwaggerGen(
                 options =>
                 {
@@ -122,8 +136,10 @@ namespace BookService
             }
 
             app.UseAuthentication();
+            app.UseForwardedHeaders();
             app.UseMiddleware<RequestLogMiddleware>();
             app.UseCors("AllowAnyOrigin");
+            //app.useStaticFiles();
 
             app.UseSwagger();
             app.UseSwaggerUI(options =>
